@@ -1227,9 +1227,7 @@ body {
 .footer-disclaimer { font-size: 0.72rem; color: rgba(255,255,255,0.25); }
 
 /* ══ 列印 ══ */
-@media screen {
-    .cert-photo-block { display: none !important; } /* 螢幕顯示時隱藏贅餘的照片 */
-}
+
 
 @media print {
     .site-header, .entrance-section, .offering-section, .result-topbar .result-topbar-right, .site-footer { display: none !important; }
