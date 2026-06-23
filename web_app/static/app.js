@@ -3,6 +3,11 @@
    全新算命館玄學風 · 垂直捲動流佈局
    ══════════════════════════════════════════════════════ */
 
+// 強制在生產環境使用 HTTPS，以確保瀏覽器能開啟相機 (getUserMedia)
+if (window.location.protocol === 'http:' && !['localhost', '127.0.0.1'].includes(window.location.hostname) && !window.location.hostname.startsWith('192.168.')) {
+    window.location.replace(window.location.href.replace('http:', 'https:'));
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
 
