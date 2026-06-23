@@ -213,7 +213,7 @@ def _dispatch_llm(provider: str, api_key: str, cnn_preds: dict, features: dict, 
                 config=google_genai.types.GenerateContentConfig(
                     response_mime_type="application/json",
                     response_schema=PhysiognomyReportSchema,
-                    max_output_tokens=4096,
+                    max_output_tokens=8192,
                     temperature=0.75,
                     safety_settings=[
                         types.SafetySetting(

@@ -274,24 +274,24 @@ def draw_annotations(image, coords, features):
 
     # 三庭線 (水平虛線)
     for pt_name, label in [
-        ("left_brow_top", "上庭/中庭"),
-        ("nose_bottom",   "中庭/下庭"),
+        ("left_brow_top", "Upper/Middle"),
+        ("nose_bottom",   "Middle/Lower"),
     ]:
         if pt_name in coords:
             y = coords[pt_name][1]
             cv2.line(img, (0, y), (w, y), (255, 255, 100), 1, cv2.LINE_AA)
             cv2.putText(img, label, (5, y-4),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.35, (255,255,100), 1)
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.35, (255, 255, 100), 1)
 
     # 右側資訊欄
     info_lines = [
-        f"臉寬/臉高: {features['face_ratio']:.2f}",
-        f"三庭均衡: {features['san_ting_balance']:.2f}",
-        f"眼神開度(左): {features['left_eye_ratio']:.2f}",
-        f"眼距比: {features['eye_gap_ratio']:.2f}",
-        f"眉長比: {features['brow_eye_ratio']:.2f}",
-        f"鼻寬比: {features['nose_width_ratio']:.2f}",
-        f"嘴寬比: {features['mouth_width_ratio']:.2f}",
+        f"Face W/H: {features['face_ratio']:.2f}",
+        f"San Ting Bal: {features['san_ting_balance']:.2f}",
+        f"Eye Ratio: {features['left_eye_ratio']:.2f}",
+        f"Eye Gap Ratio: {features['eye_gap_ratio']:.2f}",
+        f"Brow/Eye Ratio: {features['brow_eye_ratio']:.2f}",
+        f"Nose/Face Ratio: {features['nose_width_ratio']:.2f}",
+        f"Mouth/Face Ratio: {features['mouth_width_ratio']:.2f}",
     ]
     panel_x = w - 180
     cv2.rectangle(img, (panel_x - 5, 10), (w - 5, 15 + len(info_lines)*18),
