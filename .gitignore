@@ -1,0 +1,27 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+venv_gpu/
+venv/
+ENV/
+env/
+
+# Data and large datasets
+data/
+下載備份/
+
+# Local configuration & environment variables
+.env
+.env.*
+
+# IDE settings
+.vscode/
+.idea/
+
+# OS generated files
+Thumbs.db
+Desktop.ini
