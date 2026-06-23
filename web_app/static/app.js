@@ -213,9 +213,17 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             state.webcamStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
             webcamVideo.srcObject = state.webcamStream;
-        } catch {
-            alert('無法啟動相機，請確認瀏覽器授權或改用「上傳照片」模式。');
-            tabBtns[0].click();
+        } catch (err) {
+            console.warn('嘗試以 facingMode: user 啟動相機失敗，改用相容模式請求：', err);
+            try {
+                // 退回最基本的視訊請求，相容性最高
+                state.webcamStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                webcamVideo.srcObject = state.webcamStream;
+            } catch (err2) {
+                console.error('無法啟動任何相機裝置：', err2);
+                alert(`無法啟動相機，請確認：\n1. 瀏覽器網址列最左側是否已授權相機權限\n2. 相機未被其他軟體（如 Teams/Zoom/Line）佔用\n3. 裝置已接上視訊鏡頭\n\n(系統代碼: ${err2.name})`);
+                tabBtns[0].click();
+            }
         }
     }
 
