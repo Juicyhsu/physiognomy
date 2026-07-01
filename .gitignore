@@ -23,6 +23,8 @@ models_cnn_expB_efficientnet/
 models_cnn_expC_mobilenet_lowLR/
 models_cnn_expD_mobilenet_batch16/
 
+# Academic reports & charts (keep locally, do not push to GitHub)
+報告圖表/
 
 # Local configuration & environment variables
 .env
