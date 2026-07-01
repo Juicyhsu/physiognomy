@@ -26,6 +26,7 @@ def extract_docx_text(docx_path, txt_path):
 
 if __name__ == "__main__":
     import os
-    docx_file = r"文檔及企劃/簡報製作/簡報生成prompt/簡報生成 結果/深度學習_乾坤AI科學面相館_完整實驗報告_(第一組)許家翎13773018.docx"
-    txt_file = "輔助工具腳本/report_text.txt"
+    docx_file = r"報告圖表/03_引入FocalLoss對照/乾坤AI_完整實驗報告_8組含FocalLoss.docx"
+    txt_file = r"輔助工具腳本/report_text_focal.txt"
     extract_docx_text(docx_file, txt_file)
+
