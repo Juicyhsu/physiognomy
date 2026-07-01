@@ -84,6 +84,40 @@ BATCH_SIZE  = 32
 EPOCHS      = 30
 LR          = 1e-4
 
+
+# ═══════════════════════════════════════
+# Focal Loss（解決類別不平衡）
+# ═══════════════════════════════════════
+
+def focal_loss(gamma: float = 2.0, alpha: float = 0.25):
+    """
+    Sigmoid Focal Loss 的 Categorical 版本（純 TF，無需 tensorflow_addons）
+
+    為什麼用 Focal Loss：
+      CelebA 標籤極度不平衡（例如圓潤臉 8,743 vs 標準臉型 83,826，比例 1:9.6）。
+      一般 Cross-Entropy 讓模型傾向預測多數類。
+      Focal Loss 透過 (1-p_t)^gamma 加權，迫使模型多關注難分樣本（少數類）。
+
+    Args:
+        gamma: focusing 參數，越大對簡單樣本的抑制越強（建議 1.0~2.0）
+        alpha: 正類的權重係數（建議 0.25）
+
+    Returns:
+        Keras 可接受的 loss 函式
+    """
+    def loss_fn(y_true, y_pred):
+        import tensorflow as tf
+        # 防止 log(0)
+        y_pred = tf.clip_by_value(y_pred, 1e-7, 1.0 - 1e-7)
+        # 每類的 cross-entropy
+        ce = -y_true * tf.math.log(y_pred)
+        # 每個樣本預測到正確類別的機率 p_t
+        p_t = tf.reduce_sum(y_true * y_pred, axis=-1, keepdims=True)
+        # focal weight：難分樣本（p_t 小）得到更高權重
+        focal_weight = alpha * tf.pow(1.0 - p_t, gamma)
+        return tf.reduce_mean(focal_weight * ce)
+    return loss_fn
+
 # 五個分類任務的設定
 TASKS = {
     "nose": {
@@ -323,7 +357,8 @@ def build_roi_dataset(
 # ═══════════════════════════════════════
 
 def build_cnn(num_classes: int, task_name: str,
-              backbone: str = "mobilenetv2") -> tf.keras.Model:
+              backbone: str = "mobilenetv2",
+              use_focal_loss: bool = False) -> tf.keras.Model:
     """
     建立 CNN 分類器
 
@@ -387,9 +422,10 @@ def build_cnn(num_classes: int, task_name: str,
                            name=f"{task_name}_output")(x)
 
     model = models.Model(inputs, outputs, name=f"cnn_{backbone}_{task_name}")
+    loss_fn = focal_loss(gamma=2.0, alpha=0.25) if use_focal_loss else "categorical_crossentropy"
     model.compile(
         optimizer=Adam(learning_rate=LR),
-        loss="categorical_crossentropy",
+        loss=loss_fn,
         metrics=["accuracy"],
     )
     return model
@@ -400,9 +436,10 @@ def build_cnn(num_classes: int, task_name: str,
 # ═══════════════════════════════════════
 
 def train_all_cnns(
-    dataset_dir: str = "data/roi_dataset",
-    model_dir:   str = "models_cnn",
-    backbone:    str = "mobilenetv2",   # "mobilenetv2" 或 "efficientnetb0"
+    dataset_dir:     str  = "data/roi_dataset",
+    model_dir:       str  = "models_cnn",
+    backbone:        str  = "mobilenetv2",   # "mobilenetv2" 或 "efficientnetb0"
+    use_focal_loss:  bool = False,           # True → Focal Loss；False → CrossEntropy
 ):
     """
     對每個任務訓練一個 CNN，並存模型
@@ -483,7 +520,8 @@ def train_all_cnns(
         print(f"  類別對應: {train_data.class_indices}")
 
         # ── 建立模型 ──
-        model = build_cnn(num_classes, task_name, backbone=backbone)
+        model = build_cnn(num_classes, task_name, backbone=backbone,
+                          use_focal_loss=use_focal_loss)
         print(f"  backbone: {backbone}")
 
         # ── Callbacks ──

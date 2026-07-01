@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>乾坤 AI 科學面相館 — 智慧命理鑑定</title>
+    <meta name="description" content="融合《麻衣相法》古典命理學與 MediaPipe、MobileNetV2 深度學習，提供 AI 面相鑑定服務。">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;700;900&family=Noto+Sans+TC:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ══ 背景裝飾層 ══ -->
+<div class="bg-layer" aria-hidden="true">
+    <div class="bg-paper"></div>
+    <div class="bg-grain"></div>
+    <div class="cloud-ornament c1"></div>
+    <div class="cloud-ornament c2"></div>
+    <div class="cloud-ornament c3"></div>
+</div>
+
+<!-- ══ 頂部匾額 ══ -->
+<header class="site-header">
+    <div class="header-inner">
+        <div class="lantern lantern-l">
+            <div class="lantern-body">
+                <span>乾</span>
+            </div>
+            <div class="lantern-tassel"></div>
+        </div>
+
+        <div class="hall-title-block">
+            <div class="hall-subtitle-top">科學命理 · 人工智慧</div>
+            <h1 class="hall-title">乾坤 AI 科學面相館</h1>
+            <div class="hall-subtitle-bot">MediaPipe · MobileNetV2 · Claude / GPT-4o / Gemini</div>
+            <div class="hall-ornament-line">
+                <span class="orn-diamond">◆</span>
+                <span class="orn-line"></span>
+                <span class="orn-char">天</span>
+                <span class="orn-line"></span>
+                <span class="orn-char">機</span>
+                <span class="orn-line"></span>
+                <span class="orn-char">解</span>
+                <span class="orn-line"></span>
+                <span class="orn-char">顏</span>
+                <span class="orn-line"></span>
+                <span class="orn-diamond">◆</span>
+            </div>
+        </div>
+
+        <div class="lantern lantern-r">
+            <div class="lantern-body">
+                <span>坤</span>
+            </div>
+            <div class="lantern-tassel"></div>
+        </div>
+    </div>
+</header>
+
+<!-- ══ 主體內容 ══ -->
+<main class="main-content">
+
+    <!-- ─── 入口儀式區 ─── -->
+    <section class="entrance-section" id="entrance">
+        <div class="entrance-inner">
+            <div class="entrance-badge">
+                <span class="badge-dot"></span>
+                <span>AI 面相系統運行中</span>
+            </div>
+
+            <p class="entrance-desc">
+                上傳一張清晰的正面人臉照片<br>
+                AI 大師將藉由古法面相學與深度學習，為您批命解顏
+            </p>
+
+            <!-- 系統狀態欄 -->
+            <div class="sys-status-bar">
+                <div class="sys-badge" id="cnn-status-badge">
+                    <span class="sys-dot" id="cnn-dot"></span>
+                    <span id="cnn-status-text">系統初始化中...</span>
+                </div>
+                <div class="sys-badge sys-badge-green">
+                    <span class="sys-dot sys-dot-green"></span>
+                    <span>LLM 命理引擎就緒</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── 上傳供桌區 ─── -->
+    <section class="offering-section" id="analyzer">
+        <div class="section-frame-top">
+            <span class="frame-corner fc-tl"></span>
+            <span class="frame-corner fc-tr"></span>
+        </div>
+
+        <div class="offering-inner">
+
+            <!-- 上傳面板 -->
+            <div class="upload-panel" id="upload-panel">
+                <div class="panel-title">
+                    <i data-lucide="image-plus"></i>
+                    <span>敬呈面相，以供鑑定</span>
+                    <div class="tab-switcher">
+                        <button class="tab-btn active" data-tab="tab-upload">上傳</button>
+                        <button class="tab-btn" data-tab="tab-webcam">相機</button>
+                    </div>
+                </div>
+
+                <div class="tab-pane active" id="tab-upload">
+                    <div class="dropzone" id="dropzone">
+                        <div class="dz-inner">
+                            <div class="dz-bagua">☯</div>
+                            <p class="dz-main">拖放照片 或 <u>點擊選擇</u></p>
+                            <p class="dz-hint">建議：正面清晰 · 光線充足 · 五官無遮擋</p>
+                        </div>
+                        <input type="file" id="file-input" accept="image/*" class="sr-only">
+                    </div>
+                </div>
+
+                <div class="tab-pane" id="tab-webcam">
+                    <div class="webcam-box">
+                        <video id="webcam-video" autoplay playsinline muted></video>
+                        <canvas id="webcam-canvas" class="sr-only"></canvas>
+                    </div>
+                    <button class="btn-capture" id="capture-btn">
+                        <i data-lucide="camera"></i> 拍攝
+                    </button>
+                </div>
+            </div>
+
+            <!-- 預覽 + 操作面板 -->
+            <div class="preview-panel sr-only" id="preview-panel">
+                <div class="img-shrine" id="img-shrine">
+                    <div class="shrine-border-top"></div>
+                    <img id="img-preview" src="" alt="面相圖">
+                    <div class="scan-overlay sr-only" id="scan-overlay">
+                        <div class="scan-beam"></div>
+                        <span class="corner-mark tl"></span>
+                        <span class="corner-mark tr"></span>
+                        <span class="corner-mark bl"></span>
+                        <span class="corner-mark br"></span>
+                    </div>
+                    <div class="shrine-border-bot"></div>
+                </div>
+                <div class="preview-actions">
+                    <button class="btn-ghost sm" id="reset-btn" disabled>
+                        <i data-lucide="refresh-ccw"></i> 重選照片
+                    </button>
+                </div>
+            </div>
+
+            <!-- 設定面板 -->
+            <div class="config-shrine">
+                <div class="config-shrine-title">
+                    <i data-lucide="sliders-horizontal"></i>
+                    <span>命理設定</span>
+                </div>
+
+                <!-- 解讀風格（移至最上方） -->
+                <div class="config-group">
+                    <label class="config-label">解讀項目</label>
+                    <div class="style-grid">
+                        <label class="style-chip active">
+                            <input type="radio" name="style" value="traditional" checked class="sr-only">
+                            <span>古籍格局</span>
+                        </label>
+                        <label class="style-chip">
+                            <input type="radio" name="style" value="modern" class="sr-only">
+                            <span>性格天賦</span>
+                        </label>
+                        <label class="style-chip">
+                            <input type="radio" name="style" value="playful" class="sr-only">
+                            <span>流年運勢</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- LLM 引擎 -->
+                <div class="config-group">
+                    <label class="config-label">命理解讀引擎</label>
+                    <div class="provider-grid" id="provider-selector">
+                        <button class="provider-card" data-provider="claude">
+                            <span class="provider-icon">✦</span>
+                            <span>Claude</span>
+                        </button>
+                        <button class="provider-card" data-provider="openai">
+                            <span class="provider-icon openai-c">⬡</span>
+                            <span>GPT-4o</span>
+                        </button>
+                        <button class="provider-card" data-provider="gemini">
+                            <span class="provider-icon gemini-c">◈</span>
+                            <span>Gemini 3.5</span>
+                        </button>
+                    </div>
+                    <div class="provider-default-row">
+                        <button class="provider-card active" data-provider="default" id="provider-default-btn">
+                            <span class="provider-icon">☯</span>
+                            <span>預設引擎</span>
+                        </button>
+                        <p class="dev-key-notice" id="dev-key-notice">
+                            系統已內建提供 Gemini 解讀服務，如未備有 API 金鑰仍可直接進行大師批命！
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 自備 API Key（直接顯示，僅非預設引擎時啟用） -->
+                <div class="config-group" id="api-key-section">
+                    <label class="config-label">
+                        <i data-lucide="key-round" style="width:14px;height:14px;vertical-align:middle;"></i>
+                        使用自備 API Key
+                    </label>
+                    <div class="key-apply-links">
+                        <a href="https://aistudio.google.com/app/apikey" target="_blank" class="key-link key-link-gemini">◈ Gemini Key</a>
+                        <a href="https://console.anthropic.com" target="_blank" class="key-link key-link-claude">✦ Claude Key</a>
+                        <a href="https://platform.openai.com/api-keys" target="_blank" class="key-link key-link-openai">⬡ OpenAI Key</a>
+                    </div>
+                    <div class="key-row">
+                        <input type="password" id="api-key-input" placeholder="貼上您的 API Key" autocomplete="off">
+                        <button class="key-vis-btn" id="key-toggle">
+                            <i data-lucide="eye" id="key-eye"></i>
+                        </button>
+                    </div>
+                    <p class="key-note"><i data-lucide="shield-check"></i> Key 僅用於本次請求，不會被儲存</p>
+                </div>
+
+
+                <!-- 操作按鈕（從照片區移至此處） -->
+                <div class="config-actions" id="preview-bar">
+                    <button class="btn-primary" id="analyze-btn" disabled>
+                        <i data-lucide="sparkles"></i> 開始批命
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-frame-bot">
+            <span class="frame-corner fc-bl"></span>
+            <span class="frame-corner fc-br"></span>
+        </div>
+    </section>
+
+    <!-- ─── 鑑定進行中 ─── -->
+    <section class="divining-section sr-only" id="state-loading">
+        <div class="divining-inner">
+            <div class="divining-circle">
+                <div class="dc-ring dc-r1"></div>
+                <div class="dc-ring dc-r2"></div>
+                <div class="dc-ring dc-r3"></div>
+                <div class="dc-bagua">☯</div>
+            </div>
+            <h2 class="divining-title">AI 大師正在批命</h2>
+            <p class="divining-tip" id="tip-text">啟動 MediaPipe 人臉網格偵測...</p>
+            <div class="divining-steps">
+                <div class="step-node active" id="si-0"><span class="sn-dot"></span><span>面相定位</span></div>
+                <div class="step-connector"></div>
+                <div class="step-node" id="si-1"><span class="sn-dot"></span><span>幾何分析</span></div>
+                <div class="step-connector"></div>
+                <div class="step-node" id="si-2"><span class="sn-dot"></span><span>CNN 鑑別</span></div>
+                <div class="step-connector"></div>
+                <div class="step-node" id="si-3"><span class="sn-dot"></span><span>命理批示</span></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── 鑑定結果 ─── -->
+    <section class="result-section sr-only" id="state-result">
+
+        <!-- 結果頂部操作欄 -->
+        <div class="result-topbar">
+            <div class="result-topbar-left">
+                <span class="live-dot"></span>
+                <strong>面相鑑定完成</strong>
+                <span class="result-time" id="result-time"></span>
+            </div>
+            <div class="result-topbar-right">
+                <span class="model-tag" id="result-model-tag"></span>
+                <button class="icon-btn" id="print-btn" title="列印/匯出 PDF"><i data-lucide="printer"></i></button>
+                <button class="icon-btn" id="download-btn" title="下載分析文字檔"><i data-lucide="download"></i></button>
+                <button class="icon-btn" id="reanalyze-btn" title="重新鑑定"><i data-lucide="refresh-cw"></i></button>
+            </div>
+        </div>
+
+        <!-- 鑑定書主體 -->
+        <div class="certificate-body">
+
+            <!-- 面相照 + MediaPipe 標註 -->
+            <div class="cert-photo-block">
+                <div class="cert-photo-frame">
+                    <div class="photo-frame-corner pfc-tl"></div>
+                    <div class="photo-frame-corner pfc-tr"></div>
+                    <img id="annotated-img" src="" alt="MediaPipe 面相標註圖">
+                    <div class="photo-frame-corner pfc-bl"></div>
+                    <div class="photo-frame-corner pfc-br"></div>
+                </div>
+                <p class="cert-photo-caption">MediaPipe 468 點人臉網格 · 精準幾何測量</p>
+            </div>
+
+            <!-- 雙路線對照 -->
+            <div class="dual-analysis">
+                <div class="dual-header">
+                    <i data-lucide="git-branch"></i>
+                    <span>雙路線面相對照分析</span>
+                </div>
+                <div class="dual-grid">
+                    <!-- 路線 A -->
+                    <div class="dual-card card-a">
+                        <div class="dual-card-title">
+                            <span class="route-badge badge-a">路線 A</span>
+                            <div>
+                                <div class="route-name">幾何規則引擎</div>
+                                <div class="route-sub">三庭五眼 · 黃金比例</div>
+                            </div>
+                        </div>
+                        <ul class="metric-list" id="geo-list"></ul>
+                        <div class="route-summary" id="rule-summary"></div>
+                    </div>
+
+                    <!-- 路線 B -->
+                    <div class="dual-card card-b">
+                        <div class="dual-card-title">
+                            <span class="route-badge badge-b">路線 B</span>
+                            <div>
+                                <div class="route-name">CNN 深度學習</div>
+                                <div class="route-sub">MobileNetV2 · 遷移學習</div>
+                            </div>
+                        </div>
+                        <div class="cnn-result-list" id="cnn-list"></div>
+                        <div class="route-summary" id="cnn-summary"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI 命理鑑定書 -->
+            <div class="fate-scroll">
+                <div class="fate-scroll-header">
+                    <div class="fate-scroll-title">
+                        <span class="scroll-orn">◈</span>
+                        <span>AI 命理鑑定書</span>
+                        <span class="scroll-orn">◈</span>
+                    </div>
+                    <span class="fate-model-tag" id="rs-model-tag"></span>
+                </div>
+                <div class="fate-scroll-seal">
+                    <div class="seal-top-line"></div>
+                    <div class="seal-mark">天機</div>
+                    <div class="seal-bot-line"></div>
+                </div>
+                
+                <!-- 五宮評分儀表盤 -->
+                <div class="palace-scores-container" id="palace-scores-container" style="display: none;">
+                    <div class="palace-scores-title">
+                        <i data-lucide="award"></i>
+                        <span>五宮專業命理評分</span>
+                    </div>
+                    <div class="palace-grid" id="palace-grid">
+                        <!-- 動態渲染五宮評分 -->
+                    </div>
+                </div>
+
+                <div class="fate-content markdown-body" id="llm-report"></div>
+                <div class="fate-scroll-footer">
+                    <span class="footer-char">終</span>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+</main>
+
+<!-- ══ 頁腳 ══ -->
+<footer class="site-footer">
+    <div class="footer-cloud footer-cloud-l"></div>
+    <div class="footer-cloud footer-cloud-r"></div>
+    <div class="footer-inner">
+        <p class="footer-title">乾坤 AI 科學面相館</p>
+        <p class="footer-tech">Powered by MediaPipe · TensorFlow MobileNetV2 · Claude / GPT-4o / Gemini</p>
+        <p class="footer-disclaimer">本系統融合學術研究與娛樂用途，面相分析結果不構成任何正式建議。</p>
+    </div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
