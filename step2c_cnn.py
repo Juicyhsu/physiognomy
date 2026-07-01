@@ -663,12 +663,13 @@ def load_cnn_models(model_dir: str = "models_cnn"):
             custom_objects={
                 'TrueDivide': TrueDivide,
                 'Subtract': CustomSubtract
-            }
+            },
+            compile=False
         )
         with open(config_path, encoding="utf-8") as f:
             _loaded_configs[task_name] = json.load(f)
 
-    print("✅ CNN 模型載入成功")
+    print("[OK] CNN 模型載入成功")
     return _loaded_models, _loaded_configs
 
 
