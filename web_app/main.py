@@ -201,6 +201,8 @@ def _dispatch_llm(provider: str, api_key: str, cnn_preds: dict, features: dict, 
             if image_path and Path(image_path).exists():
                 try:
                     img = Image.open(image_path)
+                    # 限制圖片尺寸最大為 800x800，加速上傳並防止大圖造成 API 傳輸超時掛起
+                    img.thumbnail((800, 800))
                     contents = [img, user_prompt]
                 except Exception as img_err:
                     print(f"多模態載入圖片失敗: {img_err}")
