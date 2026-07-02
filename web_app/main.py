@@ -417,6 +417,15 @@ async def analyze(
         with open(img_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
+        # 限制上傳圖片尺寸最大為 1000 像素，優化整體處理效能並防止大圖生成超大 Base64 回傳導致網路掛起
+        try:
+            from PIL import Image
+            with Image.open(img_path) as pil_img:
+                pil_img.thumbnail((1000, 1000))
+                pil_img.save(img_path)
+        except Exception as resize_err:
+            print(f"[WARN] 縮放上傳圖片失敗: {resize_err}")
+
         # Step 1: MediaPipe
         features, _ = analyze_face(str(img_path), output_dir=temp_dir)
         if features is None:
