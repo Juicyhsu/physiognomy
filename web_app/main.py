@@ -82,12 +82,23 @@ app = FastAPI(
 CNN_READY = False
 try:
     from step2c_cnn import predict_with_cnn, generate_cnn_report, load_cnn_models
-    load_cnn_models()
+    _cnn_models, _ = load_cnn_models()
+    # ── 模型預熱（Warm-up）：消除 tf.function retracing 開銷 ──
+    # 第一次 predict() 會觸發 TensorFlow 的 Tracing（編譯計算圖），耗時 5-10 秒/模型
+    # 在伺服器啟動時先跑一次 zeros 輸入，讓後續真實請求直接使用已編譯的計算圖，
+    # 速度可從每次 25-50 秒的 retracing 縮短到 < 1 秒的純數值運算
+    import numpy as np
+    print("[INFO] CNN 模型預熱中，首次請求將更快...")
+    for _task, _model in _cnn_models.items():
+        _dummy = np.zeros((1, 64, 64, 3), dtype="float32")
+        _model.predict(_dummy, verbose=0)
+    print("[OK] CNN 預熱完成，所有模型已完成 tf.function tracing！")
     CNN_READY = True
     print("[OK] CNN 模型載入成功，Web App 已啟用深度學習路線！")
 except Exception as e:
     print(f"[WARN] CNN 模型未載入，可能尚未訓練完畢或找不到檔案: {e}")
     print("   後端將自動以 Mock 測試數據替代，以便測試介面！")
+
 
 
 from pydantic import BaseModel, Field
